@@ -73,7 +73,7 @@ class BarBase():
       self.oled.framebuf.fill_rect(
         self.x + 1 + math.ceil(self.width * (percent / 100)),
         self.y + 1,
-        math.floor((self.width - 2) * (self.percent - percent) / 100),
+        math.ceil((self.width - 2) * (self.percent - percent) / 100),
         self.height - 2,
         0
       )
