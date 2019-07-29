@@ -7,6 +7,7 @@ If your application requires redraws every update (if, for instance, you have a 
 # Usage
 
 ## Basic infinite progress bar
+![GitHub Logo](/images/basic.jpg)
 ```python
 import ssd1306
 import progress_bar
@@ -30,6 +31,7 @@ while True:
 ```
 
 ## Infinite progress bar with text
+![GitHub Logo](/images/text.jpg)
 ```python
 
 # create a new progress bar
@@ -41,6 +43,7 @@ while True:
   infinte_bar.set_text('SLEEPING %s' % index, 0)
   infinte_bar.update()
   oled.show()
+  
   if index >= 99:
     index = 0
   else:
