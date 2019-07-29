@@ -6,7 +6,7 @@ If your application requires redraws every update (if, for instance, you have a 
 
 # Usage
 
-## Basic infinite progress bar
+## Basic infinite UI bar
 ![Basic Infinite Bar](/images/basic.jpg)
 ```python
 import ssd1306
@@ -30,7 +30,7 @@ while True:
   oled.show()
 ```
 
-## Infinite progress bar with text
+## Infinite UI bar with text
 ![Infinite Bar With Text](/images/text.jpg)
 ```python
 
@@ -50,7 +50,7 @@ while True:
     index += 1
 ```
 
-## Progress progress bar
+## Progress UI bar
 ```python
 
 # create a new progress bar
