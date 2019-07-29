@@ -30,21 +30,13 @@ class BarBase():
     self.inited = True
   
   def update(self):
-    if not self.inited:
-      x_range = range(0, self.width + 1)
-      y_range = range(0, self.height + 1)
-    else:
-      x_range = range(1, math.floor(self.width * (self.percent / 100)))
-      y_range = range(1, self.height)
+    x_range = range(1, math.floor(self.width * (self.percent / 100)))
+    y_range = range(1, self.height)
     
     for i in x_range:
       for j in y_range:
-        if i == 0 or j == 0 or i == self.width or j == self.height:
-          if not self.inited:
-            # draw outline
-            self.oled.pixel(self.x + i, self.y + j, 1)
-        else:
-          # draw barbershop poll
+        if 0 < i < self.width and 0 <j < self.height:
+          # draw bar
           self.oled.pixel(
             self.x + i, 
             self.y + j,
@@ -53,6 +45,16 @@ class BarBase():
     
     # print the text out
     self.draw_text()
+    
+    # draw outline
+    if not self.inited:
+      self.oled.framebuf.rect(
+        self.x,
+        self.y,
+        self.width,
+        self.height,
+        1
+      )
     
     # increase phase
     self.phase = (self.phase + 1) % (self.band_width - 1)
@@ -71,8 +73,8 @@ class BarBase():
       self.oled.framebuf.fill_rect(
         self.x + 1 + math.ceil(self.width * (percent / 100)),
         self.y + 1,
-        math.floor(self.width * (self.percent - percent) / 100),
-        self.height - 1,
+        math.floor((self.width - 2) * (self.percent - percent) / 100),
+        self.height - 2,
         0
       )
     self.percent = percent
@@ -114,9 +116,9 @@ class ProgressBar(BarBase):
     
     bar_count = math.ceil((self.width * (self.percent / 100)) / self.band_width * 2)
     for i in range(bar_count):
-      for j in range(0, self.height - 1):
+      for j in range(0, self.height - 2):
         x = i * self.band_width - j - self.phase
-        if 0 < x < self.width * (self.percent / 100):
+        if 0 < x < self.width * (self.percent / 100) - 1:
           # draw left side
           self.oled.pixel(
             self.x + x, 
@@ -124,7 +126,7 @@ class ProgressBar(BarBase):
             1
           )
         x = x + math.floor(self.band_width / 2)
-        if 0 < x < self.width * (self.percent / 100):
+        if 0 < x < self.width * (self.percent / 100) - 1:
           # draw right side
           self.oled.pixel(
             self.x + x, 
