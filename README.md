@@ -2,12 +2,12 @@
 This is a collection of display elements for showing progress on ssd1306 OLED screen using micropython.
 
 The elements are built to reduce draw calls to the frame buffer (improving performance).
-If your application requires redraws every update (if, for instance, you have a loading bar which animates across the screen while updating) you can call the "*_base" classes instead which will repaint the entire element on updates.
+If your application requires redraws every update (if, for instance, you have a loading bar which animates across the screen while updating) you can call the "BarBase" class instead which will repaint the entire element on updates.
 
 # Usage
 
 ## Basic infinite progress bar
-![GitHub Logo](/images/basic.jpg)
+![Basic Infinite Bar](/images/basic.jpg)
 ```python
 import ssd1306
 import progress_bar
@@ -19,7 +19,7 @@ oled_height = 64
 oled = ssd1306.SSD1306_I2C(oled_width, oled_height, i2c)
 
 # create a new progress bar
-infinte_bar = progress_bar.infinite_bar(10, 40, oled.width - 20, 15, oled)
+infinte_bar = progress_bar.ProgressBar(10, 40, oled.width - 20, 15, oled)
 
 oled.text('connecting to', 0, 10)
 oled.text('network...', 0, 20)
@@ -31,17 +31,36 @@ while True:
 ```
 
 ## Infinite progress bar with text
-![GitHub Logo](/images/text.jpg)
+![Infinite Bar With Text](/images/text.jpg)
 ```python
 
 # create a new progress bar
-infinte_bar = progress_bar.infinite_bar(10, 40, oled.width - 20, 15, oled)
+infinte_bar = progress_bar.ProgressBar(10, 40, oled.width - 20, 15, oled)
 index = 0
 # animate the progress bar
 while True:
   # set dynamic text on top of bar
   infinte_bar.set_text('SLEEPING %s' % index, 0)
   infinte_bar.update()
+  oled.show()
+  
+  if index >= 99:
+    index = 0
+  else:
+    index += 1
+```
+
+## Progress progress bar
+```python
+
+# create a new progress bar
+my_bar = progress_bar.ProgressBar(10, 40, oled.width - 20, 15, oled)
+index = 0
+# animate the progress bar
+while True:
+  # set amount of bar to fill
+  my_bar.set_percent(index)
+  my_bar.update()
   oled.show()
   
   if index >= 99:
