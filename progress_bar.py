@@ -1,14 +1,15 @@
 import math
 
 class BarStyle():
-  DIAGONAL_FORWARD  = 0
-  DIAGONAL_BACKWARD = 1
-  ARROW_FORWARD     = 2
-  ARROW_BACKWARD    = 3
+  SOLID             = 0
+  DIAGONAL_FORWARD  = 1
+  DIAGONAL_BACKWARD = 2
+  ARROW_FORWARD     = 3
+  ARROW_BACKWARD    = 4
 
-class infinite_bar_base():
+class BarBase():
   
-  def __init__(self, x, y, width, height, oled, band_style=0, band_width=20):
+  def __init__(self, x, y, width, height, oled, band_style=1, band_width=20, percent=100):
     self.inited = False
     
     self.x = x
@@ -19,9 +20,11 @@ class infinite_bar_base():
     self.phase = 0
     self.band_width = band_width
     self.band_style = band_style
+    self.percent = percent
     
     self.text = None
     self.text_color = 1
+    self.show_text_mask = True
     
     self.update()
     self.inited = True
@@ -31,7 +34,7 @@ class infinite_bar_base():
       x_range = range(0, self.width + 1)
       y_range = range(0, self.height + 1)
     else:
-      x_range = range(1, self.width)
+      x_range = range(1, math.floor(self.width * (self.percent / 100)))
       y_range = range(1, self.height)
     
     for i in x_range:
@@ -57,9 +60,22 @@ class infinite_bar_base():
   def _get_pixel_color(self, x, y, phase):
     return ((phase + x + y) % self.band_width * 2) < self.band_width
   
-  def set_text(self, text, color=1):
+  def set_text(self, text, color=1, show_text_mask=True):
     self.text = text
     self.text_color = color
+    self.show_text_mask = show_text_mask
+    
+  def set_percent(self, percent=100):
+    if self.percent > percent:
+      # clear out previous percentage
+      self.oled.framebuf.fill_rect(
+        self.x + 1 + math.ceil(self.width * (percent / 100)),
+        self.y + 1,
+        math.floor(self.width * (self.percent - percent) / 100),
+        self.height - 1,
+        0
+      )
+    self.percent = percent
   
   def draw_text(self):
     if self.text == None:
@@ -71,18 +87,19 @@ class infinite_bar_base():
     text_x = math.floor(self.x + (self.width - text_width) / 2)
     text_y = math.floor(self.y + (self.height - 6) / 2)
     
-    self.oled.framebuf.fill_rect(
-      text_x - block_padding,
-      text_y - block_padding,
-      text_width + block_padding * 2,
-      8 + block_padding * 2,
-      not self.text_color
-    )
+    if self.show_text_mask:
+      self.oled.framebuf.fill_rect(
+        text_x - block_padding,
+        text_y - block_padding,
+        text_width + block_padding * 2,
+        8 + block_padding * 2,
+        not self.text_color
+      )
     self.oled.text(self.text, text_x, text_y, self.text_color)
-  
-class infinite_bar(infinite_bar_base):
-  def __init__(self, x, y, width, height, oled):
-    super().__init__(x, y, width, height, oled)
+
+class ProgressBar(BarBase):
+  def __init__(self, x, y, width, height, oled, band_style=1, band_width=20, percent=100):
+    super().__init__(x, y, width, height, oled, band_style, band_width, percent)
     self.inited = True
   
   def redraw(self):
@@ -95,11 +112,11 @@ class infinite_bar(infinite_bar_base):
       # update unoptimized the first time (paint all pixels)
       return super().update()
     
-    bar_count = math.ceil(self.width / self.band_width * 2)
+    bar_count = math.ceil((self.width * (self.percent / 100)) / self.band_width * 2)
     for i in range(bar_count):
       for j in range(0, self.height - 1):
         x = i * self.band_width - j - self.phase
-        if 0 < x < self.width:
+        if 0 < x < self.width * (self.percent / 100):
           # draw left side
           self.oled.pixel(
             self.x + x, 
@@ -107,7 +124,7 @@ class infinite_bar(infinite_bar_base):
             1
           )
         x = x + math.floor(self.band_width / 2)
-        if 0 < x < self.width:
+        if 0 < x < self.width * (self.percent / 100):
           # draw right side
           self.oled.pixel(
             self.x + x, 
@@ -120,4 +137,3 @@ class infinite_bar(infinite_bar_base):
     
     # increase phase
     self.phase = (self.phase + 1) % (self.band_width)
-
