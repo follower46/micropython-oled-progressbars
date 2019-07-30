@@ -4,6 +4,8 @@ This is a collection of display elements for showing progress on ssd1306 OLED sc
 The elements are built to reduce draw calls to the frame buffer (improving performance).
 If your application requires redraws every update (if, for instance, you have a loading bar which animates across the screen while updating) you can call the "BarBase" class instead which will repaint the entire element on updates.
 
+Video Example: https://youtu.be/vPRc3ypMsm0
+
 # Usage
 
 ## Basic infinite UI bar
