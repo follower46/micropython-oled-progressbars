@@ -22,6 +22,8 @@ class BarBase():
     self.band_style = band_style
     self.percent = percent
     
+    self._reverse = False
+    
     self.text = None
     self.text_color = 1
     self.show_text_mask = True
@@ -40,7 +42,7 @@ class BarBase():
           self.oled.pixel(
             self.x + i, 
             self.y + j,
-            self._get_pixel_color(i, j, self.phase)
+            self._get_pixel_color(i, j)
           )
     
     # print the text out
@@ -57,15 +59,35 @@ class BarBase():
       )
     
     # increase phase
-    self.phase = (self.phase + 1) % (self.band_width - 1)
+    self._increase_phase()
   
-  def _get_pixel_color(self, x, y, phase):
-    return ((phase + x + y) % self.band_width * 2) < self.band_width
+  def _increase_phase(self):
+    increment = 1
+    if self._reverse:
+      increment = -1
+    self.phase = (self.phase - increment) % self.band_width
+  
+  def _get_pixel_color(self, x, y):
+    if self.band_style == BarStyle.SOLID:
+      return 1
+    
+    if self.band_style == BarStyle.DIAGONAL_FORWARD:
+      return ((self.phase + x + y + 1) % self.band_width * 2) < self.band_width
+  
+  def _set_pixel(self, x, y):
+    self.oled.pixel(
+      self.x + x, 
+      self.y + y,
+      self._get_pixel_color(x, y)
+    )
   
   def set_text(self, text, color=1, show_text_mask=True):
     self.text = text
     self.text_color = color
     self.show_text_mask = show_text_mask
+  
+  def reverse(self):
+    self._reverse = not self._reverse
     
   def set_percent(self, percent=100):
     if self.percent > percent:
@@ -123,7 +145,7 @@ class ProgressBar(BarBase):
           self.oled.pixel(
             self.x + x, 
             self.y + j + 1,
-            1
+            self._get_pixel_color(x, j+1)
           )
         x = x + math.floor(self.band_width / 2)
         if 0 < x < self.width * (self.percent / 100) - 1:
@@ -131,11 +153,11 @@ class ProgressBar(BarBase):
           self.oled.pixel(
             self.x + x, 
             self.y + j + 1,
-            0
+            self._get_pixel_color(x, j+1)
           )
     
     # print the text out
     self.draw_text()
     
     # increase phase
-    self.phase = (self.phase + 1) % (self.band_width)
+    self._increase_phase()
