@@ -6,6 +6,7 @@ If your application requires redraws every update (if, for instance, you have a 
 
 ### Video Examples
 Painting Methods: https://youtu.be/5uRfoD2mhn8
+
 ESP8266 vs ESP32: https://youtu.be/vPRc3ypMsm0
 
 # Usage
